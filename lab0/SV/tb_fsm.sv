@@ -36,11 +36,14 @@ module stimulus ();
    
    initial 
      begin      
-	#0  reset = 1'b0;
-	#12 reset = 1'b1;	
-	#0  In = 1'b0;
-	#20 In = 1'b1;
-	#20 In = 1'b0;
+	#0  reset = 1'b0; In = 1'b1;
+     #1  reset = 1'b1;
+	#10 reset = 1'b0; In = 1'b0;
+	#10 In = 1'b1;
+	#10 In = 1'b0;
+     #20 In = 1'b1;
+     #20 In = 1'b0;
+     #20 In = 1'b1;
      end
 
 endmodule // stimulus

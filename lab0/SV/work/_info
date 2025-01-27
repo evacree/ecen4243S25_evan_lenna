@@ -1,70 +1,86 @@
 m255
 K4
 z2
-!s99 nomlopt
-!s11f vlog 2021.3_1 2021.08, Aug 15 2021
+Z0 !s99 nomlopt
+R0
+R0
+!s12c _opt1
+R0
+!s11f MIXED_VERSIONS
+R0
 13
 !s112 1.1
 !i10d 8192
 !i10e 25
 !i10f 100
 cModel Technology
-Z0 d/home/jstine/ecen4243/ecen4243S25/lab0/SV
+Z1 dC:/Users/22eva/Documents/ecen4243S25-main/lab0/SV
 T_opt
-Z1 !s110 1734562498
-Vi6g]EM;XBeOmL[AlCYkXW0
-04 8 4 work stimulus fast 0
-=1-b07b25d4a6a8-676352c2-3ea03-13546
-!s124 OEM100
-o-quiet -auto_acc_if_foreign -work work +acc
-Z2 tCvgOpt 0
+!s110 1736801388
+V2KnSkIBN@i;kbLG<Gi1fI2
+Z2 04 8 4 work stimulus fast 0
+=1-a004ab834b80-67857c6c-160-544c
+Z3 !s124 OEM100
+Z4 o-quiet -auto_acc_if_foreign -work work +acc
+Z5 tCvgOpt 0
 n@_opt
-OL;O;2021.3_1;73
-vfsm
-Z3 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z6 OL;O;2021.3;73
 R1
-!i10b 1
-!s100 a^2@0O]MI?Qo=K2=5cm970
-I]lPo_<ZDnkC4jPaND[W;A0
-S1
-R0
-w1734562462
-8fsm.sv
-Ffsm.sv
-!i122 0
-L0 1 29
-Z4 VDg1SIo80bB@j0V0VzS_@n1
-Z5 OL;L;2021.3_1;73
-r1
-!s85 0
-31
-Z6 !s108 1734562498.000000
-Z7 !s107 tb_fsm.sv|fsm.sv|
-Z8 !s90 fsm.sv|tb_fsm.sv|
-!i113 0
-Z9 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+T_opt1
+!s110 1737508153
+VQ03WM4]7amB][2g_S2]6f3
 R2
-vstimulus
+=1-d04a03dcd1e5-67904539-87-5e44
 R3
-R1
-!i10b 1
-!s100 C1fRHj@T0M02[GB[<gR6K1
-IV^c]>fS5l9Ljji;mm9^PG0
-S1
-R0
-w1734562494
-8tb_fsm.sv
-Ftb_fsm.sv
-!i122 0
-L0 1 46
 R4
 R5
+n@_opt1
+R6
+vregfile
+Z7 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z8 !s110 1737508152
+!i10b 1
+!s100 RB2gaA6`YBdTIoWHHiz1R2
+IOK@hoGGGZPRFmezIb;i3R2
+S1
+Z9 dC:/Users/22eva/Documents/ecen4243S25-main/CompArch_Lab0/SV
+w1737507935
+8regfile.sv
+Fregfile.sv
+!i122 0
+L0 1 41
+Z10 VDg1SIo80bB@j0V0VzS_@n1
+Z11 OL;L;2021.3;73
 r1
 !s85 0
 31
-R6
+Z12 !s108 1737508152.000000
+Z13 !s107 tb_regfile.sv|regfile.sv|
+Z14 !s90 -reportprogress|300|regfile.sv|tb_regfile.sv|
+!i113 0
+Z15 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R5
+vstimulus
 R7
 R8
-!i113 0
+!i10b 1
+!s100 5SB<6R[0lQVd;[NNBB3_J0
+IBOc8T6Yob`ZG8MIaEDjDH2
+S1
 R9
-R2
+w1737508121
+8tb_regfile.sv
+Ftb_regfile.sv
+!i122 0
+L0 1 70
+R10
+R11
+r1
+!s85 0
+31
+R12
+R13
+R14
+!i113 0
+R15
+R5
