@@ -1,0 +1,1 @@
+void fir(int* A, int* x, int* y, int n, int m);
