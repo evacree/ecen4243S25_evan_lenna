@@ -11,15 +11,48 @@
 // when the value 25 (0x19) is written to address 100 (0x64)
 
 //   Instruction  opcode    funct3    funct7
+
+// R-type:
+
+// DONE:
 //   add          0110011   000       0000000
 //   sub          0110011   000       0100000
 //   and          0110011   111       0000000
 //   or           0110011   110       0000000
 //   slt          0110011   010       0000000
+
+// DONE?:
+//   sll          0110011   001       0000000
+//   sltu         0110011   011       0000000
+//   srl          0110011   101       0000000
+//   sra          0110011   101       0100000
+//   xor          0110011   100       0000000
+
+
+//I-type:
+
+// DONE:
 //   addi         0010011   000       immediate
 //   andi         0010011   111       immediate
 //   ori          0010011   110       immediate
 //   slti         0010011   010       immediate
+
+// DONE?????????:
+//   slli         0010011   001       000000*
+//   sltiu        0010011   011       immediate
+//   xori         0010011   100       immediate
+//   srli         0010011   101       000000*
+//   srai         0010011   101       010000*
+
+// TODO:
+//   lb           0000011   000       immediate
+//   lh           0000011   001       immediate
+//   lw           0000011   010       immediate
+//   lbu          0000011   100       immediate
+//   lhu          0000011   101       immediate
+
+
+
 //   beq          1100011   000       immediate
 //   lw	          0000011   010       immediate
 //   sw           0100011   010       immediate
@@ -81,7 +114,7 @@ module riscvsingle (input  logic        clk, reset,
    
    logic 				ALUSrc, RegWrite, Jump, Zero;
    logic [1:0] 				ResultSrc, ImmSrc;
-   logic [2:0] 				ALUControl;
+   logic [3:0] 				ALUControl; //Change from 3 to 4 bits
    
    controller c (Instr[6:0], Instr[14:12], Instr[30], Zero,
 		 ResultSrc, MemWrite, PCSrc,
@@ -104,7 +137,7 @@ module controller (input  logic [6:0] op,
 		   output logic       PCSrc, ALUSrc,
 		   output logic       RegWrite, Jump,
 		   output logic [1:0] ImmSrc,
-		   output logic [2:0] ALUControl);
+		   output logic [3:0] ALUControl); //Change from 3 to 4 bits
    
    logic [1:0] 			      ALUOp;
    logic 			      Branch;
@@ -138,33 +171,46 @@ module maindec (input  logic [6:0] op,
        7'b1100011: controls = 11'b0_10_0_0_00_1_01_0; // beq
        7'b0010011: controls = 11'b1_00_1_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 11'b1_11_0_0_10_0_00_1; // jal
+
        default: controls = 11'bx_xx_x_x_xx_x_xx_x; // ???
+
      endcase // case (op)
    
 endmodule // maindec
 
-module aludec (input  logic       opb5,
+module aludec (input  logic       opb5,  //-----------------------------
 	       input  logic [2:0] funct3,
 	       input  logic 	  funct7b5,
 	       input  logic [1:0] ALUOp,
-	       output logic [2:0] ALUControl);
+	       output logic [3:0] ALUControl); //Change from 3 to 4 bits
    
    logic 			  RtypeSub;
    
    assign RtypeSub = funct7b5 & opb5; // TRUE for R–type subtract
    always_comb
+   //CHANGED ALUControl from 3 to 4 bits
      case(ALUOp)
-       2'b00: ALUControl = 3'b000; // addition
-       2'b01: ALUControl = 3'b001; // subtraction
+       2'b00: ALUControl = 4'b0000; // addition
+       2'b01: ALUControl = 4'b0001; // subtraction
        default: case(funct3) // R–type or I–type ALU
 		  3'b000: if (RtypeSub)
-		    ALUControl = 3'b001; // sub
+		    ALUControl = 4'b0001; // sub
 		  else
-		    ALUControl = 3'b000; // add, addi
-		  3'b010: ALUControl = 3'b101; // slt, slti
-		  3'b110: ALUControl = 3'b011; // or, ori
-		  3'b111: ALUControl = 3'b010; // and, andi
-		  default: ALUControl = 3'bxxx; // ???
+		    ALUControl = 4'b0000; // add, addi
+		  3'b010: ALUControl = 4'b0101; // slt, slti
+		  3'b110: ALUControl = 4'b0011; // or, ori
+		  3'b111: ALUControl = 4'b0010; // and, andi
+
+      3'b100: ALUControl = 4'b0110; // xor, xori
+      3'b001: ALUControl = 4'b0111; //sll, slli
+      3'b011: ALUControl = 4'b1000; //sltu, sltiu
+      
+      3'b101: if (funct7b5) 
+        ALUControl = 4'b1010; //sra, srai
+      else
+        ALUControl = 4'b1001; //srl, srli
+
+		  default: ALUControl = 4'bxxxx; // ???
 		endcase // case (funct3)       
      endcase // case (ALUOp)
    
@@ -175,7 +221,7 @@ module datapath (input  logic        clk, reset,
 		 input  logic 	     PCSrc, ALUSrc,
 		 input  logic 	     RegWrite,
 		 input  logic [1:0]  ImmSrc,
-		 input  logic [2:0]  ALUControl,
+		 input  logic [3:0]  ALUControl, //CHANGE: 3 to 4 bits
 		 output logic 	     Zero,
 		 output logic [31:0] PC,
 		 input  logic [31:0] Instr,
@@ -224,6 +270,9 @@ module extend (input  logic [31:7] instr,
        2'b10:  immext = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};       
        // J−type (jal)
        2'b11:  immext = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
+
+      // TODO: Include U-type for lui?
+
        default: immext = 32'bx; // undefined
      endcase // case (immsrc)
    
@@ -304,8 +353,8 @@ module dmem (input  logic        clk, we,
    
 endmodule // dmem
 
-module alu (input  logic [31:0] a, b,
-            input  logic [2:0] 	alucontrol,
+module alu (input  logic [31:0] a, b, //------------------------------------
+            input  logic [3:0] 	alucontrol, //change from 3 to 4 bits
             output logic [31:0] result,
             output logic 	zero);
 
@@ -319,12 +368,23 @@ module alu (input  logic [31:0] a, b,
                      ~alucontrol[1] & alucontrol[0];   
 
    always_comb
-     case (alucontrol)
-       3'b000:  result = sum;         // add
-       3'b001:  result = sum;         // subtract
-       3'b010:  result = a & b;       // and
-       3'b011:  result = a | b;       // or
-       3'b101:  result = sum[31] ^ v; // slt       
+     case (alucontrol) //Changed alucontrol from 3 to 4 bits
+       4'b0000:  result = sum;         // add
+       4'b0001:  result = sum;         // subtract
+       4'b0010:  result = a & b;       // and
+       4'b0011:  result = a | b;       // or
+       4'b0101:  result = sum[31] ^ v; // slt 
+
+       // NEW:
+       // Are case values right?
+
+       4'b0110:  result = a ^ b;       // xor    
+       4'b0111:  result = a << b;      //sll
+       4'b1000:  result = a < b;       //sltu
+       4'b1010:  result = a >>> b;     //sra
+       4'b1001:  result = a >> b;      //srl
+
+
        default: result = 32'bx;
      endcase
 
