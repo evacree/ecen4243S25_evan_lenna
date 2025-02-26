@@ -387,15 +387,10 @@ module alu (input  logic [31:0] a, b, //------------------------------------
 
        4'b0110:  result = a ^ b;       // xor  
 
-       4'b0111:  
-       // if(b >= 0)
-        result = a << b;      //sll
-       // else
-        // result = a >> b;
-        
+       4'b0111:  result = a << b[4:0];      //sll
        4'b1000:  result = a < b;       //sltu
-       4'b1010:  result = a >>> b;     //sra
-       4'b1001:  result = a >> b;      //srl
+       4'b1010:  result = $signed(a) >>> b[4:0];     //sra
+       4'b1001:  result = a >> b[4:0];      //srl
        4'b1011:  result = b;           //lui
 
 
