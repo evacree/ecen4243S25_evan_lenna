@@ -73,7 +73,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../testing/sll.memfile"}; // change to run different tests (.memfile)
+        memfilename = {"../testing/auipc.memfile"}; // change to run different tests (.memfile)
         $readmemh(memfilename, dut.imem.RAM);
      end
 
@@ -112,19 +112,19 @@ module riscvsingle (input  logic        clk, reset,
 		    output logic [31:0] ALUResult, WriteData,
 		    input  logic [31:0] ReadData);
    
-   logic 				ALUSrc, RegWrite, Jump, Zero;
+   logic 				ALUSrc, RegWrite, Jump, Zero, Negative, Carry, Overflow;
    logic [1:0] 				ResultSrc; 
    logic [2:0]        ImmSrc;
    logic [3:0] 				ALUControl; //Change from 3 to 4 bits
    
-   controller c (Instr[6:0], Instr[14:12], Instr[30], Zero,
+   controller c (Instr[6:0], Instr[14:12], Instr[30], Zero, Negative, Carry, Overflow,
 		 ResultSrc, MemWrite, PCSrc,
 		 ALUSrc, RegWrite, Jump,
 		 ImmSrc, ALUControl);
    datapath dp (clk, reset, ResultSrc, PCSrc,
 		ALUSrc, RegWrite,
 		ImmSrc, ALUControl,
-		Zero, PC, Instr,
+		Zero, Negative, Carry, Overflow, PC, Instr,
 		ALUResult, WriteData, ReadData);
    
 endmodule // riscvsingle
@@ -132,7 +132,7 @@ endmodule // riscvsingle
 module controller (input  logic [6:0] op,
 		   input  logic [2:0] funct3,
 		   input  logic       funct7b5,
-		   input  logic       Zero,
+		   input  logic       Zero, Negative, Carry, Overflow,
 		   output logic [1:0] ResultSrc,
 		   output logic       MemWrite,
 		   output logic       PCSrc, ALUSrc,
@@ -142,11 +142,24 @@ module controller (input  logic [6:0] op,
    
    logic [1:0] 			      ALUOp;
    logic 			      Branch;
+   logic            Branch_condition;
    
    maindec md (op, ResultSrc, MemWrite, Branch,
 	       ALUSrc, RegWrite, Jump, ImmSrc, ALUOp);
    aludec ad (op[5], funct3, funct7b5, ALUOp, ALUControl);
-   assign PCSrc = Branch & (Zero ^ funct3[0]) | Jump;
+
+   always_comb begin // Branch condition (pass or fail) calculation
+    case(funct3)
+      3'b000: Branch_condition = (Zero); // beq
+      3'b001: Branch_condition = (~Zero); // bne
+      3'b100: Branch_condition = (Negative ^ Overflow); // blt
+      3'b101: Branch_condition = (~(Negative ^ Overflow)); // bge
+      3'b110: Branch_condition = (~Carry); // bltu
+      3'b111: Branch_condition = (Carry); // bgeu
+    endcase
+   end
+
+   assign PCSrc = (Branch & Branch_condition) | Jump;
    
 endmodule // controller
 
@@ -169,7 +182,7 @@ module maindec (input  logic [6:0] op,
        7'b0000011: controls = 12'b1_000_1_0_01_0_00_0; // lw
        7'b0100011: controls = 12'b0_001_1_1_00_0_00_0; // sw
        7'b0110011: controls = 12'b1_xxx_0_0_00_0_10_0; // R–type
-       7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // branches (beq, bne)
+       7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // branches (beq, bne, etc)
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
        //TODO: ADD lui, auipc
@@ -226,7 +239,7 @@ module datapath (input  logic        clk, reset,
 		 input  logic 	     RegWrite,
 		 input  logic [2:0]  ImmSrc,
 		 input  logic [3:0]  ALUControl, //CHANGE: 3 to 4 bits
-		 output logic 	     Zero,
+		 output logic 	     Zero, Negative, Carry, Overflow,
 		 output logic [31:0] PC,
 		 input  logic [31:0] Instr,
 		 output logic [31:0] ALUResult, WriteData,
@@ -248,7 +261,7 @@ module datapath (input  logic        clk, reset,
    extend  ext (Instr[31:7], ImmSrc, ImmExt);
    // ALU logic
    mux2 #(32)  srcbmux (WriteData, ImmExt, ALUSrc, SrcB);
-   alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero);
+   alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero, Negative, Carry, Overflow);
    mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4,ResultSrc, Result);
 
 endmodule // datapath
@@ -360,12 +373,18 @@ endmodule // dmem
 
 module alu (input  logic [31:0] a, b, //------------------------------------
             input  logic [3:0] 	alucontrol, //change from 3 to 4 bits
-            output logic [31:0] result,
-            output logic 	zero);
+            output logic [31:0] result, //calculation result
 
-   logic [31:0] 	       condinvb, sum;
-   logic 		       v;              // overflow
+            output logic 	zero, //Output flags for branch calc. in controller
+            output logic negative,
+            output logic carry,
+            output logic v);
+
+   logic [31:0] 	       condinvb; 
+   logic [32:0]          sum;      // extended 1 bit to have easy carry flag calc.
    logic 		       isAddSub;       // true when is add or subtract operation
+
+   
 
    assign condinvb = alucontrol[0] ? ~b : b;
    assign sum = a + condinvb + alucontrol[0];
@@ -374,16 +393,11 @@ module alu (input  logic [31:0] a, b, //------------------------------------
 
    always_comb
      case (alucontrol) //Changed alucontrol from 3 to 4 bits
-       4'b0000:  result = sum;         // add
-       4'b0001:  result = sum;         // subtract
+       4'b0000:  result = sum[31:0];         // add
+       4'b0001:  result = sum[31:0];         // subtract
        4'b0010:  result = a & b;       // and
        4'b0011:  result = a | b;       // or
        4'b0101:  result = sum[31] ^ v; // slt 
-
-       // NEW:
-       // Are case values right?
-
-       
 
        4'b0110:  result = a ^ b;       // xor  
 
@@ -399,10 +413,10 @@ module alu (input  logic [31:0] a, b, //------------------------------------
        default: result = 32'bx;
      endcase
 
-   assign zero = (result == 32'b0);
-   assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub; //overflow flag
-   //TODO: add negative flag?
-  
+   assign zero = (result == 32'b0); // zero result flag
+   assign negative = result[31]; // negative result flag
+   assign carry = (~alucontrol[1]) & sum[32]; // carry from result flag
+   assign v = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub; //overflow flag  
 
    
 endmodule // alu

@@ -1,1 +1,0 @@
-/opt/questasim/linux_x86_64/VisualizerRls/bin/viscom -nolock -quiet -jmem_size 393216 work.testbench -quiet -auto_acc_if_foreign -work work -debugdb +acc -allow_unnamed -o _opt1 -id 1-000ae431a4f1-67bd0207-f228a-12a56 +__betafsm
