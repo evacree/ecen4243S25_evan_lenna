@@ -73,7 +73,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../testing/auipc.memfile"}; // change to run different tests (.memfile)
+        memfilename = {"../testing/jalr.memfile"}; // change to run different tests (.memfile)
         $readmemh(memfilename, dut.imem.RAM);
      end
 
@@ -134,8 +134,8 @@ module controller (input  logic [6:0] op,
 		   input  logic       funct7b5,
 		   input  logic       Zero, Negative, Carry, Overflow,
 		   output logic [1:0] ResultSrc,
-		   output logic       MemWrite,
-		   output logic       PCSrc, ALUSrc,
+		   output logic       MemWrite, 
+       output logic       ALUSrc, PCSrc, 
 		   output logic       RegWrite, Jump,
 		   output logic [2:0] ImmSrc,
 		   output logic [3:0] ALUControl); //Change from 3 to 4 bits
@@ -185,8 +185,12 @@ module maindec (input  logic [6:0] op,
        7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // branches (beq, bne, etc)
        7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I–type ALU
        7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
+    
        //TODO: ADD lui, auipc
+
        7'b0110111: controls = 12'b1_100_1_0_00_0_11_0; //lui
+
+       7'b0010111: controls = 12'b1_100_0_0_11_0_11_0; //auipc ??
 
        default: controls = 12'bx_xxx_x_x_xx_x_xx_x; // ???
 
@@ -235,7 +239,7 @@ endmodule // aludec
 
 module datapath (input  logic        clk, reset,
 		 input  logic [1:0]  ResultSrc,
-		 input  logic 	     PCSrc, ALUSrc,
+		 input  logic 	     ALUSrc, PCSrc,
 		 input  logic 	     RegWrite,
 		 input  logic [2:0]  ImmSrc,
 		 input  logic [3:0]  ALUControl, //CHANGE: 3 to 4 bits
@@ -254,7 +258,8 @@ module datapath (input  logic        clk, reset,
    flopr #(32) pcreg (clk, reset, PCNext, PC);
    adder  pcadd4 (PC, 32'd4, PCPlus4);
    adder  pcaddbranch (PC, ImmExt, PCTarget);
-   mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
+   mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext); 
+
    // register file logic
    regfile  rf (clk, RegWrite, Instr[19:15], Instr[24:20],
 	       Instr[11:7], Result, SrcA, WriteData);
@@ -262,8 +267,18 @@ module datapath (input  logic        clk, reset,
    // ALU logic
    mux2 #(32)  srcbmux (WriteData, ImmExt, ALUSrc, SrcB);
    alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero, Negative, Carry, Overflow);
-   mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4,ResultSrc, Result);
+   //mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4,ResultSrc, Result);
 
+   always_comb begin
+   //extend mux from line 275 to a 4 way mux
+     case(ResultSrc)
+       2'b00: Result = ALUResult; 
+       2'b01: Result = ReadData; 
+       2'b10: Result = PCPlus4; 
+       2'b11: Result = PCTarget; 
+       endcase
+   end
+   
 endmodule // datapath
 
 module adder (input  logic [31:0] a, b,
