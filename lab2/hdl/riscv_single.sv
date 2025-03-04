@@ -11,52 +11,15 @@
 // when the value 25 (0x19) is written to address 100 (0x64)
 
 //   Instruction  opcode    funct3    funct7
-
-// R-type:
-
-// DONE:
-//   add          0110011   000       0000000
-//   sub          0110011   000       0100000
-//   and          0110011   111       0000000
-//   or           0110011   110       0000000
-//   slt          0110011   010       0000000
-
-// DONE?:
-//   sll          0110011   001       0000000
-//   sltu         0110011   011       0000000
-//   srl          0110011   101       0000000
-//   sra          0110011   101       0100000
-//   xor          0110011   100       0000000
-
-
-//I-type:
-
-// DONE:
-//   addi         0010011   000       immediate
-//   andi         0010011   111       immediate
-//   ori          0010011   110       immediate
-//   slti         0010011   010       immediate
-
-// DONE?????????:
-//   slli         0010011   001       000000*
-//   sltiu        0010011   011       immediate
-//   xori         0010011   100       immediate
-//   srli         0010011   101       000000*
-//   srai         0010011   101       010000*
-
 // TODO:
 //   lb           0000011   000       immediate
 //   lh           0000011   001       immediate
 //   lw           0000011   010       immediate
 //   lbu          0000011   100       immediate
 //   lhu          0000011   101       immediate
-
-
-
-//   beq          1100011   000       immediate
-//   lw	          0000011   010       immediate
+//   sb           0100011   000       immediate
+//   sh	          0100011   001       immediate
 //   sw           0100011   010       immediate
-//   jal          1101111   immediate immediate
 
 module testbench();
 
@@ -73,7 +36,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../testing/jalr.memfile"}; // change to run different tests (.memfile)
+        memfilename = {"../testing/auipc.memfile"}; // change to run different tests (.memfile)
         $readmemh(memfilename, dut.imem.RAM);
      end
 
@@ -112,20 +75,20 @@ module riscvsingle (input  logic        clk, reset,
 		    output logic [31:0] ALUResult, WriteData,
 		    input  logic [31:0] ReadData);
    
-   logic 				ALUSrc, RegWrite, Jump, Zero, Negative, Carry, Overflow;
+   logic 				ALUSrc, RegWrite, Jump, Zero, Negative, Carry, Overflow, jalrsig; //pass through new jalrsig control signal
    logic [1:0] 				ResultSrc; 
    logic [2:0]        ImmSrc;
    logic [3:0] 				ALUControl; //Change from 3 to 4 bits
    
    controller c (Instr[6:0], Instr[14:12], Instr[30], Zero, Negative, Carry, Overflow,
 		 ResultSrc, MemWrite, PCSrc,
-		 ALUSrc, RegWrite, Jump,
-		 ImmSrc, ALUControl);
+		 ALUSrc, RegWrite, Jump, 
+		 ImmSrc, ALUControl, jalrsig);  //pass through new jalrsig control signal
    datapath dp (clk, reset, ResultSrc, PCSrc,
-		ALUSrc, RegWrite,
+		ALUSrc, RegWrite,    
 		ImmSrc, ALUControl,
 		Zero, Negative, Carry, Overflow, PC, Instr,
-		ALUResult, WriteData, ReadData);
+		ALUResult, WriteData, ReadData, jalrsig); //pass through new jalrsig control signal
    
 endmodule // riscvsingle
 
@@ -135,17 +98,18 @@ module controller (input  logic [6:0] op,
 		   input  logic       Zero, Negative, Carry, Overflow,
 		   output logic [1:0] ResultSrc,
 		   output logic       MemWrite, 
-       output logic       ALUSrc, PCSrc, 
+       output logic       ALUSrc, PCSrc,
 		   output logic       RegWrite, Jump,
 		   output logic [2:0] ImmSrc,
-		   output logic [3:0] ALUControl); //Change from 3 to 4 bits
+		   output logic [3:0] ALUControl, //Change from 3 to 4 bits
+       output logic jalrsig);  //pass through new jalrsig control signal
    
    logic [1:0] 			      ALUOp;
    logic 			      Branch;
    logic            Branch_condition;
    
    maindec md (op, ResultSrc, MemWrite, Branch,
-	       ALUSrc, RegWrite, Jump, ImmSrc, ALUOp);
+	       ALUSrc, RegWrite, Jump, ImmSrc, ALUOp, jalrsig);  //pass through new jalrsig control signal
    aludec ad (op[5], funct3, funct7b5, ALUOp, ALUControl);
 
    always_comb begin // Branch condition (pass or fail) calculation
@@ -166,33 +130,31 @@ endmodule // controller
 module maindec (input  logic [6:0] op,
 		output logic [1:0] ResultSrc,
 		output logic 	   MemWrite,
-		output logic 	   Branch, ALUSrc,
+		output logic 	   Branch, ALUSrc, 
 		output logic 	   RegWrite, Jump,
 		output logic [2:0] ImmSrc,
-		output logic [1:0] ALUOp);
+		output logic [1:0] ALUOp,
+    output logic jalrsig); //pass through new jalrsig control signal
    
-   logic [11:0] 		   controls;
+   logic [12:0] 		   controls;
    
    assign {RegWrite, ImmSrc, ALUSrc, MemWrite,
-	   ResultSrc, Branch, ALUOp, Jump} = controls;
+	   ResultSrc, Branch, ALUOp, Jump,jalrsig} = controls;  //pass through new jalrsig control signal
    
    always_comb
      case(op)
-       // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump
-       7'b0000011: controls = 12'b1_000_1_0_01_0_00_0; // lw
-       7'b0100011: controls = 12'b0_001_1_1_00_0_00_0; // sw
-       7'b0110011: controls = 12'b1_xxx_0_0_00_0_10_0; // R–type
-       7'b1100011: controls = 12'b0_010_0_0_00_1_01_0; // branches (beq, bne, etc)
-       7'b0010011: controls = 12'b1_000_1_0_00_0_10_0; // I–type ALU
-       7'b1101111: controls = 12'b1_011_0_0_10_0_00_1; // jal
-    
-       //TODO: ADD lui, auipc
+       // RegWrite_ImmSrc_ALUSrc_MemWrite_ResultSrc_Branch_ALUOp_Jump_jalrsig
+       7'b0000011: controls = 13'b1_000_1_0_01_0_00_0_0; // lw
+       7'b0100011: controls = 13'b0_001_1_1_00_0_00_0_0; // sw
+       7'b0110011: controls = 13'b1_xxx_0_0_00_0_10_0_0; // R–type
+       7'b1100011: controls = 13'b0_010_0_0_00_1_01_0_0; // branches (beq, bne, etc)
+       7'b0010011: controls = 13'b1_000_1_0_00_0_10_0_0; // I–type ALU
+       7'b1101111: controls = 13'b1_011_0_0_10_0_00_1_0; // jal
+       7'b0110111: controls = 13'b1_100_1_0_00_0_11_0_0; //lui
+       7'b0010111: controls = 13'b1_100_1_0_11_0_11_0_0; //auipc
+       7'b1100111: controls = 13'b1_000_1_0_10_0_00_1_1;  //jalr
 
-       7'b0110111: controls = 12'b1_100_1_0_00_0_11_0; //lui
-
-       7'b0010111: controls = 12'b1_100_0_0_11_0_11_0; //auipc ??
-
-       default: controls = 12'bx_xxx_x_x_xx_x_xx_x; // ???
+       default: controls = 13'bx_xxx_x_x_xx_x_xx_x_x; // ???
 
      endcase // case (op)
    
@@ -246,19 +208,20 @@ module datapath (input  logic        clk, reset,
 		 output logic 	     Zero, Negative, Carry, Overflow,
 		 output logic [31:0] PC,
 		 input  logic [31:0] Instr,
-		 output logic [31:0] ALUResult, WriteData,
-		 input  logic [31:0] ReadData);
+		 output logic [31:0] ALUResult, WriteData, 
+		 input  logic [31:0] ReadData,
+     input logic jalrsig); //pass through new jalrsig control signal
    
-   logic [31:0] 		     PCNext, PCPlus4, PCTarget;
+   logic [31:0] 		     PCNext, PCPlus4, PCTarget,PCNextTemp; //declare temporary variable
    logic [31:0] 		     ImmExt;
    logic [31:0] 		     SrcA, SrcB;
    logic [31:0] 		     Result;
    
    // next PC logic
-   flopr #(32) pcreg (clk, reset, PCNext, PC);
+   flopr #(32) pcreg (clk, reset, PCNext, PC); 
    adder  pcadd4 (PC, 32'd4, PCPlus4);
    adder  pcaddbranch (PC, ImmExt, PCTarget);
-   mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext); 
+   mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNextTemp); //change output from PCNext to PCNextTemp. This gets fed through the new jalrmux
 
    // register file logic
    regfile  rf (clk, RegWrite, Instr[19:15], Instr[24:20],
@@ -267,17 +230,13 @@ module datapath (input  logic        clk, reset,
    // ALU logic
    mux2 #(32)  srcbmux (WriteData, ImmExt, ALUSrc, SrcB);
    alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero, Negative, Carry, Overflow);
+   
    //mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4,ResultSrc, Result);
-
-   always_comb begin
-   //extend mux from line 275 to a 4 way mux
-     case(ResultSrc)
-       2'b00: Result = ALUResult; 
-       2'b01: Result = ReadData; 
-       2'b10: Result = PCPlus4; 
-       2'b11: Result = PCTarget; 
-       endcase
-   end
+   // extend mux for AUIPC
+   mux4 #(32) resultmux (ALUResult, ReadData, PCPlus4, PCTarget, ResultSrc, Result);
+   
+   //new mux for jalr
+    mux2 #(32) jalrmux(PCNextTemp, ALUResult, jalrsig, PCNext);
    
 endmodule // datapath
 
@@ -350,6 +309,16 @@ module mux3 #(parameter WIDTH = 8)
   assign y = s[1] ? d2 : (s[0] ? d1 : d0);
    
 endmodule // mux3
+
+//define a new 4 input mux
+module mux4 #(parameter WIDTH = 8)
+   (input  logic [WIDTH-1:0] d0, d1, d2, d3, 
+    input logic [1:0]         s,               
+    output logic [WIDTH-1:0]  y);              
+   
+  assign y = s[1] ? (s[0] ? d3 : d2) : (s[0] ? d1 : d0);
+   
+endmodule // mux4
 
 module top (input  logic        clk, reset,
 	    output logic [31:0] WriteData, DataAdr,
