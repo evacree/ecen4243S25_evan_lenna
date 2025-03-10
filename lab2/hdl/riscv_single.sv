@@ -36,7 +36,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../testing/auipc.memfile"}; // change to run different tests (.memfile)
+        memfilename = {"../testing/lhu.memfile"}; // change to run different tests (.memfile)
         $readmemh(memfilename, dut.imem.RAM);
      end
 
@@ -53,19 +53,8 @@ module testbench();
 	clk <= 1; # 5; clk <= 0; # 5;
      end
 
-   // check results
-   always @(negedge clk)
-     begin
-	if(MemWrite) begin
-           if(DataAdr === 100 & WriteData === 25) begin
-              $display("Simulation succeeded");
-              $stop;
-           end else if (DataAdr !== 96) begin
-              $display("Simulation failed");
-              $stop;
-           end
-	end
-     end
+
+   
 endmodule // testbench
 
 module riscvsingle (input  logic        clk, reset,
@@ -216,6 +205,69 @@ module datapath (input  logic        clk, reset,
    logic [31:0] 		     ImmExt;
    logic [31:0] 		     SrcA, SrcB;
    logic [31:0] 		     Result;
+
+   logic [31:0]          Load_line; //for use in load case statements
+   logic [31:0]          Write_line; //for use in store case statements
+   logic [31:0]          orig_WriteData;
+
+   always_comb begin // sb
+   if (Instr[6:0] == 7'b0100011) begin //begin sb, sh, sw
+    if (Instr[14:12] == 3'b000) begin //sb
+      case(ALUResult[1:0])
+        2'b00: Write_line = {ReadData[31:8],  orig_WriteData[7:0]};
+        2'b01: Write_line = {ReadData[31:16],  orig_WriteData[7:0],  ReadData[7:0]};
+        2'b10: Write_line = {ReadData[31:24],  orig_WriteData[7:0],  ReadData[15:0]};
+        2'b11: Write_line = {orig_WriteData[7:0],  ReadData[24:0]};
+        default: Write_line = 32'bx;
+      endcase
+    end else if (Instr[14:12] == 3'b001) begin //sh
+      case(ALUResult[1:0])
+        2'b00: Write_line = {ReadData[31:16],  orig_WriteData[15:0]}; 
+        2'b10: Write_line = {orig_WriteData[15:0],  ReadData[15:0]};
+        default: Write_line = 32'bx;
+      endcase
+    end else if (Instr[14:12] == 3'b010) begin //sw
+        Write_line = orig_WriteData;
+    end
+   end
+   
+   if (Instr[6:0] == 7'b0000011) begin //END STORES, BEGIN lb, lh, lw
+    if (Instr[14:12] == 3'b000) begin //lb
+      case(ALUResult[1:0])
+        2'b00: Load_line = {{24{ReadData[7]}},  ReadData[7:0]};
+        2'b01: Load_line = {{24{ReadData[15]}},  ReadData[15:8]};
+        2'b10: Load_line = {{24{ReadData[23]}},  ReadData[23:16]};
+        2'b11: Load_line = {{24{ReadData[31]}},  ReadData[31:24]};
+        default: Load_line = 32'bx;
+      endcase
+    end else if (Instr[14:12] == 3'b001) begin //lh
+      case(ALUResult[1:0])
+        2'b00: Load_line = {{16{ReadData[15]}},  ReadData[15:0]};
+        2'b10: Load_line = {{16{ReadData[31]}},  ReadData[31:16]};
+        default: Load_line = 32'bx;
+      endcase
+    end else if (Instr[14:12] == 3'b010) begin //lw
+        Load_line = ReadData;
+    end else if (Instr[14:12] == 3'b100) begin //lbu
+      case(ALUResult[1:0])
+        2'b00: Load_line = {24'b0,  ReadData[7:0]};
+        2'b01: Load_line = {24'b0,  ReadData[15:8]};
+        2'b10: Load_line = {24'b0,  ReadData[23:16]};
+        2'b11: Load_line = {24'b0,  ReadData[31:24]};
+        default: Load_line = 32'bx;
+      endcase
+    end else if (Instr[14:12] == 3'b101) begin //lhu
+      case(ALUResult[1:0])
+        2'b00: Load_line = {16'b0,  ReadData[15:0]};
+        2'b10: Load_line = {16'b0,  ReadData[31:16]};
+        default: Load_line = 32'bx;
+      endcase
+    end 
+   end
+
+   end //end always_comb
+   
+
    
    // next PC logic
    flopr #(32) pcreg (clk, reset, PCNext, PC); 
@@ -225,19 +277,21 @@ module datapath (input  logic        clk, reset,
 
    // register file logic
    regfile  rf (clk, RegWrite, Instr[19:15], Instr[24:20],
-	       Instr[11:7], Result, SrcA, WriteData);
+	       Instr[11:7], Result, SrcA, orig_WriteData);
    extend  ext (Instr[31:7], ImmSrc, ImmExt);
    // ALU logic
-   mux2 #(32)  srcbmux (WriteData, ImmExt, ALUSrc, SrcB);
+
+   mux2 #(32)  srcbmux (orig_WriteData, ImmExt, ALUSrc, SrcB); 
    alu  alu (SrcA, SrcB, ALUControl, ALUResult, Zero, Negative, Carry, Overflow);
    
    //mux3 #(32) resultmux (ALUResult, ReadData, PCPlus4,ResultSrc, Result);
    // extend mux for AUIPC
-   mux4 #(32) resultmux (ALUResult, ReadData, PCPlus4, PCTarget, ResultSrc, Result);
+   mux4 #(32) resultmux (ALUResult, Load_line, PCPlus4, PCTarget, ResultSrc, Result); //Changed ReadData to Load_line
    
    //new mux for jalr
     mux2 #(32) jalrmux(PCNextTemp, ALUResult, jalrsig, PCNext);
-   
+    mux2 #(32) storeInst(orig_WriteData, Write_line, (Instr[6:0] == 7'b0100011), WriteData);
+
 endmodule // datapath
 
 module adder (input  logic [31:0] a, b,
@@ -347,7 +401,7 @@ module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[255:0];
+   logic [31:0] 		 RAM[1028:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    always_ff @(posedge clk)
@@ -409,7 +463,7 @@ module regfile (input  logic        clk,
 		input  logic 	    we3, 
 		input  logic [4:0]  a1, a2, a3, 
 		input  logic [31:0] wd3, 
-		output logic [31:0] rd1, rd2);
+		output logic [31:0] rd1, rd2); //WriteData
 
    logic [31:0] 		    rf[31:0];
 

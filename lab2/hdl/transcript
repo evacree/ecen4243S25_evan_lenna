@@ -11,12 +11,12 @@
 # //  is prohibited from disclosure under the Trade Secrets Act,
 # //  18 U.S.C. Section 1905.
 # //
-# do riscv_single.do
+# do {.\riscv_single.do}
 # ** Warning: (vdel-134) Unable to remove locked optimized design "_opt".  Locker is jstine@sakuya.ecen.okstate.edu.
 # ** Warning: (vlib-34) Library already exists at "work".
 # Errors: 0, Warnings: 1
 # Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
-# Start time: 16:59:07 on Mar 04,2025
+# Start time: 09:38:27 on Mar 10,2025
 # vlog -reportprogress 300 riscv_single.sv 
 # -- Compiling module testbench
 # -- Compiling module riscvsingle
@@ -41,13 +41,13 @@
 # 	testbench
 # 	flopenr
 # 	mux3
-# End time: 16:59:07 on Mar 04,2025, Elapsed time: 0:00:00
+# End time: 09:38:27 on Mar 10,2025, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
-# Start time: 16:59:07 on Mar 04,2025
+# Start time: 09:38:27 on Mar 10,2025
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
-# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_single.sv:350
+# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=1029, type=RAM at location riscv_single.sv:404
 # Loading sv_std.std
 # Loading work.testbench(fast)
 # Loading work.top(fast)
@@ -71,10 +71,10 @@
 # Debug data file does not match loaded design.
 # ** Error: Could not open the database because of the following problem accessing the required debug information:
 # Debug data file does not match loaded design.
-# Error in macro ./riscv_single.do line 87
+# Error in macro ././riscv_single.do line 87
 # Could not open the database because of the following problem accessing the required debug information:
 # Debug data file does not match loaded design.
 #     while executing
 # "add schematic -full sim:/testbench/dut/rv32single"
-# End time: 16:59:23 on Mar 04,2025, Elapsed time: 0:00:16
+# End time: 09:40:15 on Mar 10,2025, Elapsed time: 0:01:48
 # Errors: 2, Warnings: 0
