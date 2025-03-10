@@ -1,5 +1,8 @@
 # HW2 Q9
-q9:
+.section .text
+.globl _start
+
+_start:
  li t0, 0x42
  li t1, 0xED
 
