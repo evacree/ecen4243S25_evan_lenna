@@ -150,6 +150,8 @@ R0
 R0
 R0
 R0
+R0
+R0
 Z1 !s12c _opt1
 R0
 R1
@@ -219,10 +221,10 @@ n@_opt
 OL;O;2021.3_1;73
 R2
 T_opt1
-!s110 1741617508
-V@_<:KL7Og;P`9^X1g3_WT3
+!s110 1741619465
+V;5g^Rl:kWjoUIEUC;2_;f1
 R3
-=1-a004ab834b80-67cef963-28d-1cac
+=1-a004ab834b80-67cf0109-1ef-82c4
 R4
 R5
 R6
@@ -230,13 +232,13 @@ n@_opt1
 OL;O;2021.3;73
 vadder
 Z7 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
-Z8 !s110 1741617507
+Z8 !s110 1741619464
 !i10b 1
 !s100 PWnM=8z_RH[c>eZ42Tbd;0
 I[`>5N?nke<ggzOA>JFiL32
 S1
 Z9 dC:/Users/22eva/Documents/ecen4243S25_evan_lenna/lab2/hdl
-Z10 w1741617488
+Z10 w1741618930
 Z11 8riscv_single.sv
 Z12 Friscv_single.sv
 !i122 0
@@ -246,7 +248,7 @@ Z14 OL;L;2021.3;73
 r1
 !s85 0
 31
-Z15 !s108 1741617507.000000
+Z15 !s108 1741619464.000000
 Z16 !s107 riscv_single.sv|
 Z17 !s90 -reportprogress|300|riscv_single.sv|
 !i113 0
@@ -616,8 +618,8 @@ vtestbench
 R7
 R8
 !i10b 1
-!s100 78XY1MXBLcUi=mc21^J4d3
-IkNBLloKdVW>6^<dhLYYL?1
+!s100 _]Q6a?U6UMjbDJZVLX`ko3
+IeOBdG5TPUD8A?Z_YAlZ=W1
 S1
 R9
 R10
