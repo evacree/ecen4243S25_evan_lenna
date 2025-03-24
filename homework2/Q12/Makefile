@@ -1,16 +1,27 @@
-TARGET = q12
+# Define target program name
+TARGET = matvecmul_program
 
-$(TARGET).objdump: $(TARGET)
-	riscv64-unknown-elf-objdump -D $(TARGET) > $(TARGET).objdump
-    
-$(TARGET): $(TARGET).S Makefile
-	riscv64-unknown-elf-gcc -g -o $(TARGET) -march=rv32i -mabi=ilp32 -mcmodel=medany \
-	    -nostartfiles -T./link.ld $(TARGET).S
+# Define the common directory path
+COMMON_DIR = ../../examples/C/common
 
-sim:
-	spike +signature=$(TARGET).signature.output +signature-granularity=8 $(TARGET)
-	diff --ignore-case $(TARGET).signature.output $(TARGET).reference_output || exit
-	echo "Signature matches! Success!"
+# Define the source files
+SRC = $(TARGET).c
 
+# Define the output file and object dump name
+OBJDUMP = $(TARGET).objdump
+
+# Create object dump from the target executable
+$(OBJDUMP): $(TARGET)
+	riscv64-unknown-elf-objdump -S $(TARGET) > $(OBJDUMP)
+
+# The main target: compile the program
+$(TARGET): $(SRC) Makefile
+	riscv64-unknown-elf-gcc -o $(TARGET) -g -O \
+	-march=rv64gc -mabi=lp64d -mcmodel=medany \
+	-nostdlib -static -lm -fno-tree-loop-distribute-patterns \
+	-T$(COMMON_DIR)/test.ld -I$(COMMON_DIR) \
+	$(SRC) $(COMMON_DIR)/crt.S $(COMMON_DIR)/syscalls.c
+
+# Clean up the build files
 clean:
-	rm -f $(TARGET) $(TARGET).objdump
+	rm -f $(TARGET) $(OBJDUMP)

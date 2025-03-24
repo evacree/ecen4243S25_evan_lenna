@@ -1,11 +1,11 @@
-TARGET = sumtest
+TARGET = q9
 
 $(TARGET).objdump: $(TARGET)
 	riscv64-unknown-elf-objdump -D $(TARGET) > $(TARGET).objdump
     
-$(TARGET): $(TARGET).S sum.S Makefile
+$(TARGET): $(TARGET).S Makefile
 	riscv64-unknown-elf-gcc -g -o $(TARGET) -march=rv64gc -mabi=lp64 -mcmodel=medany \
-	    -nostartfiles -T../../link/link.ld $(TARGET).S sum.S
+	    -nostartfiles -T./link.ld $(TARGET).S
 
 sim:
 	spike +signature=$(TARGET).signature.output +signature-granularity=8 $(TARGET)
@@ -13,7 +13,4 @@ sim:
 	echo "Signature matches! Success!"
 
 clean:
-	rm -f $(TARGET) $(TARGET).objdump $(TARGET).signature.output
-
-
-
+	rm -f $(TARGET) $(TARGET).objdump
