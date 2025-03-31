@@ -92,8 +92,9 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../riscvtest/riscvtest.memfile"};
+        memfilename = {"../riscvtest/jalr.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
+  $readmemh(memfilename, dut.dmem.RAM);
      end
    
    // initialize test
@@ -202,7 +203,7 @@ module controller(input  logic		 clk, reset,  ///DONE(?????)
                   // Writeback stage control signals
                   output logic 	     RegWriteW, // for datapath and Hazard Unit
                   output logic [1:0] ResultSrcW,
-                  output logic       jalrsig); //ADDED
+                  output logic       jalrsigE); //ADDED
 
    // pipelined control signals
    logic 			     RegWriteD, RegWriteE;
@@ -214,10 +215,11 @@ module controller(input  logic		 clk, reset,  ///DONE(?????)
    logic [3:0] 			     ALUControlD; //3 to 4 bits 
    logic 			     ALUSrcD;
    logic           Branch_condition;
+   logic           jalrsigD; //ADDED
    
    // Decode stage logic
    maindec md(opD, ResultSrcD, MemWriteD, BranchD,
-              ALUSrcD, RegWriteD, JumpD, ImmSrcD, ALUOpD, jalrsig);
+              ALUSrcD, RegWriteD, JumpD, ImmSrcD, ALUOpD, jalrsigD);
    aludec  ad(opD[5], funct3D, funct7b5D, ALUOpD, ALUControlD);
 
    always_comb begin // Branch condition (pass or fail) calculation
@@ -228,13 +230,14 @@ module controller(input  logic		 clk, reset,  ///DONE(?????)
       3'b101: Branch_condition = (~(NegE ^ OverflowE)); // bge
       3'b110: Branch_condition = (~CarrE); // bltu
       3'b111: Branch_condition = (CarrE); // bgeu
+      default: Branch_condition = 1'b0;
     endcase
    end
    
    // Execute stage pipeline control register and logic
-   floprc #(11) controlregE(clk, reset, FlushE,
-                            {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD},
-                            {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE});
+   floprc #(12) controlregE(clk, reset, FlushE,
+                            {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD, jalrsigD},
+                            {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE, jalrsigE});
 
    assign PCSrcE = (BranchE & Branch_condition) | JumpE;
    assign ResultSrcEb0 = ResultSrcE[0];
@@ -276,8 +279,9 @@ module maindec (input  logic [6:0] op, //DONE
        7'b0110111: controls = 13'b1_100_1_0_00_0_11_0_0; //lui
        7'b0010111: controls = 13'b1_100_1_0_11_0_11_0_0; //auipc
        7'b1100111: controls = 13'b1_000_1_0_10_0_00_1_1;  //jalr
+       7'b0000000: controls = 13'b0_000_0_0_00_0_00_0_0; // need valid values at reset
 
-       default: controls = 13'bx_xxx_x_x_xx_x_xx_x_x; // ???
+       default: controls = 13'bx_xxx_x_x_xx_x_xx_x_0; // ???
 
      endcase // case (op)
    
