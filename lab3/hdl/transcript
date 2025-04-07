@@ -14,7 +14,7 @@
 # //
 # do riscv_pipelined.do
 # QuestaSim-64 vlog 2024.3_2 Compiler 2024.11 Nov 25 2024
-# Start time: 15:52:31 on Apr 07,2025
+# Start time: 16:44:36 on Apr 07,2025
 # vlog -reportprogress 300 riscv_pipelined.sv 
 # -- Compiling module testbench
 # -- Compiling module top
@@ -41,16 +41,16 @@
 # Top level modules:
 # 	testbench
 # 	mux4
-# End time: 15:52:31 on Apr 07,2025, Elapsed time: 0:00:00
+# End time: 16:44:36 on Apr 07,2025, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
-# Start time: 15:52:31 on Apr 07,2025
+# Start time: 16:44:36 on Apr 07,2025
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
 # ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility. The +acc switch would be deprecated in a future release.
 # Support of the MGLS_LICENSE_FILE and LM_LICENSE_FILE licensing environment variables will be discontinued starting with the 2025.1 release. Please update to using the SALT_LICENSE_SERVER variable.
 # Please contact Siemens EDA Customer Support (https://support.sw.siemens.com/) for assistance.
-# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=1029, type=RAM at location riscv_pipelined.sv:588
+# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=16385, type=RAM at location riscv_pipelined.sv:601
 # ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # Loading sv_std.std
 # Loading work.testbench(fast)
@@ -77,5 +77,9 @@
 # Loading work.imem(fast)
 # Loading work.dmem(fast)
 # ** Note: (vsim-8900) Creating design debug database vsim.dbg.
-# End time: 15:55:12 on Apr 07,2025, Elapsed time: 0:02:41
+# Simulation failed
+# ** Note: $stop    : riscv_pipelined.sv(121)
+#    Time: 3595 ns  Iteration: 1  Instance: /testbench
+# Break in Module testbench at riscv_pipelined.sv line 121
+# End time: 16:46:09 on Apr 07,2025, Elapsed time: 0:01:33
 # Errors: 0, Warnings: 1

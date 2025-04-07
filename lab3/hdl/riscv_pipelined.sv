@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../testing/jalr.memfile"};
+        memfilename = {"../testing/bgeu.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
   $readmemh(memfilename, dut.dmem.RAM);
      end
@@ -109,7 +109,19 @@ module testbench();
 	clk <= 1; # 5; clk <= 0; # 5;
      end
 
-   
+   // check results
+   always @(negedge clk)
+     begin
+	if(MemWrite) begin
+           if(DataAdr === 100 & WriteData === 25) begin
+              $display("Simulation succeeded");
+              $stop;
+           end else if (DataAdr !== 96) begin
+              $display("Simulation failed");
+              $stop;
+           end
+	end
+     end
 endmodule
 
 module top(input  logic        clk, reset, 
@@ -204,6 +216,7 @@ module controller(input  logic		 clk, reset,  ///DONE(?????)
    logic 			     ALUSrcD;
    logic           Branch_condition;
    logic           jalrsigD; //ADDED
+   logic [2:0]     funct3E; //ADDED
    
    // Decode stage logic
    maindec md(opD, ResultSrcD, MemWriteD, BranchD,
@@ -211,7 +224,7 @@ module controller(input  logic		 clk, reset,  ///DONE(?????)
    aludec  ad(opD[5], funct3D, funct7b5D, ALUOpD, ALUControlD);
 
    always_comb begin // Branch condition (pass or fail) calculation
-    case(funct3D)
+    case(funct3E)
       3'b000: Branch_condition = (ZeroE); // beq
       3'b001: Branch_condition = (~ZeroE); // bne
       3'b100: Branch_condition = (NegE ^ OverflowE); // blt
@@ -223,9 +236,9 @@ module controller(input  logic		 clk, reset,  ///DONE(?????)
    end
    
    // Execute stage pipeline control register and logic
-   floprc #(12) controlregE(clk, reset, FlushE,
-                            {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD, jalrsigD},
-                            {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE, jalrsigE});
+   floprc #(15) controlregE(clk, reset, FlushE,
+                            {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD, jalrsigD, funct3D},
+                            {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE, jalrsigE, funct3E});
 
    assign PCSrcE = (BranchE & Branch_condition) | JumpE;
    assign ResultSrcEb0 = ResultSrcE[0];
@@ -585,7 +598,7 @@ module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[1028:0];
+   logic [31:0] 		 RAM[16384:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    always_ff @(posedge clk)
