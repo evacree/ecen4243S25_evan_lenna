@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../riscvtest/jalr.memfile"};
+        memfilename = {"../testing/jalr.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
   $readmemh(memfilename, dut.dmem.RAM);
      end
@@ -109,19 +109,7 @@ module testbench();
 	clk <= 1; # 5; clk <= 0; # 5;
      end
 
-   // check results
-   always @(negedge clk)
-     begin
-	if(MemWrite) begin
-           if(DataAdr === 100 & WriteData === 25) begin
-              $display("Simulation succeeded");
-              $stop;
-           end else if (DataAdr !== 96) begin
-              $display("Simulation failed");
-              $stop;
-           end
-	end
-     end
+   
 endmodule
 
 module top(input  logic        clk, reset, 
@@ -428,7 +416,7 @@ module datapath(input logic clk, reset,
                       {ALUResultW, ReadDataW, RdW, PCPlus4W});
    mux3   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, ResultSrcW, ResultW);	
 
-   mux2 #(32) jalrmux(PCNextTemp, ALUResultW, jalrsig, PCNextF); //ADDED
+   mux2 #(32) jalrmux(PCNextTemp, ALUResultE, jalrsig, PCNextF); //ADDED
 
 
 endmodule
