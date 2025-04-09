@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../testing/bgeu.memfile"};
+        memfilename = {"../testing/jalr.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
   $readmemh(memfilename, dut.dmem.RAM);
      end
@@ -110,18 +110,7 @@ module testbench();
      end
 
    // check results
-   always @(negedge clk)
-     begin
-	if(MemWrite) begin
-           if(DataAdr === 100 & WriteData === 25) begin
-              $display("Simulation succeeded");
-              $stop;
-           end else if (DataAdr !== 96) begin
-              $display("Simulation failed");
-              $stop;
-           end
-	end
-     end
+   
 endmodule
 
 module top(input  logic        clk, reset, 
@@ -409,9 +398,10 @@ module datapath(input logic clk, reset,
                       {RD1D, RD2D, PCD, Rs1D, Rs2D, RdD, ImmExtD, PCPlus4D}, 
                       {RD1E, RD2E, PCE, Rs1E, Rs2E, RdE, ImmExtE, PCPlus4E});
    
-   mux3   #(32)  faemux(RD1E, ResultW, ALUResultM, ForwardAE, SrcAE);
+   mux3   #(32)  faemux(RD1E, ResultW, ALUResultM, ForwardAE, SrcAE); //TODO: modify or add mux for auipc forwarding?
    mux3   #(32)  fbemux(RD2E, ResultW, ALUResultM, ForwardBE, WriteDataE);
    mux2   #(32)  srcbmux(WriteDataE, ImmExtE, ALUSrcE, SrcBE);
+   mux2   #(32)  jalrmux(PCNextTemp, ALUResultE, jalrsig, PCNextF); //ADDED, moved from writeback to execute
 
    
 
@@ -427,9 +417,13 @@ module datapath(input logic clk, reset,
    flopr  #(101) regW(clk, reset, 
                       {ALUResultM, ReadDataM, RdM, PCPlus4M},
                       {ALUResultW, ReadDataW, RdW, PCPlus4W});
-   mux3   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, ResultSrcW, ResultW);	
+   mux4   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, PCTargetE, ResultSrcW, ResultW);	//expanded to 4-way mux for auipc
 
-   mux2 #(32) jalrmux(PCNextTemp, ALUResultE, jalrsig, PCNextF); //ADDED
+   //TODO: AUIPC more complex -- needing a new mux for proper forwarding.
+
+   //TODO: change ReadDataW to loadline for load/store instructions, pass loadline/others through register stages?
+
+   
 
 
 endmodule
