@@ -17,7 +17,7 @@ proc create_report { reportName command } {
   }
 }
 namespace eval ::optrace {
-  variable script "/home/ross/repos/ELVIS/lab2/lab2.runs/impl_1/design_1_wrapper.tcl"
+  variable script "/home/06-comp-arch-m/ecen4243S25_evan_lenna/lab3/lab3/lab2.runs/impl_1/design_1_wrapper.tcl"
   variable category "vivado_impl"
 }
 
@@ -124,11 +124,12 @@ start_step write_bitstream
 set ACTIVE_STEP write_bitstream
 set rc [catch {
   create_msg_db write_bitstream.pb
-  set_param chipscope.maxJobs 8
-  set_param xicom.use_bs_reader 1
   set_param tcl.collectionResultDisplayLimit 0
+  set_param chipscope.maxJobs 5
+  set_param xicom.use_bs_reader 1
+  set_param runs.launchOptions { -jobs 10  }
   open_checkpoint design_1_wrapper_routed.dcp
-  set_property webtalk.parent_dir /home/ross/repos/ELVIS/lab2/lab2.cache/wt [current_project]
+  set_property webtalk.parent_dir /home/06-comp-arch-m/ecen4243S25_evan_lenna/lab3/lab3/lab2.cache/wt [current_project]
 set_property TOP design_1_wrapper [current_fileset]
 OPTRACE "read constraints: write_bitstream" START { }
 OPTRACE "read constraints: write_bitstream" END { }

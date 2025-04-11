@@ -12,13 +12,13 @@ set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==design_1_pr
 # IP: bd/design_1/ip/design_1_AXI_Converter_0_0/design_1_AXI_Converter_0_0.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==design_1_AXI_Converter_0_0 || ORIG_REF_NAME==design_1_AXI_Converter_0_0} -quiet] -quiet
 
-# IP: bd/design_1/ip/design_1_axi_smc_0/design_1_axi_smc_0.xci
-set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==design_1_axi_smc_0 || ORIG_REF_NAME==design_1_axi_smc_0} -quiet] -quiet
-
 # IP: bd/design_1/ip/design_1_rst_ps7_0_50M_0/design_1_rst_ps7_0_50M_0.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==design_1_rst_ps7_0_50M_0 || ORIG_REF_NAME==design_1_rst_ps7_0_50M_0} -quiet] -quiet
+
+# IP: bd/design_1/ip/design_1_axi_smc_0/design_1_axi_smc_0.xci
+set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==design_1_axi_smc_0 || ORIG_REF_NAME==design_1_axi_smc_0} -quiet] -quiet
 
 # IP: bd/design_1/ip/design_1_top_0_0/design_1_top_0_0.xci
 set_property KEEP_HIERARCHY SOFT [get_cells -hier -filter {REF_NAME==design_1_top_0_0 || ORIG_REF_NAME==design_1_top_0_0} -quiet] -quiet
 
-# XDC: bd/design_1/design_1_ooc.xdc
+# XDC: /home/06-comp-arch-m/ecen4243S25_evan_lenna/lab3/lab3/lab2.gen/sources_1/bd/design_1/design_1_ooc.xdc

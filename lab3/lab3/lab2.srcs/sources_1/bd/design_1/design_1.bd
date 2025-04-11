@@ -7,7 +7,8 @@
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "Hierarchical",
       "tool_version": "2020.2",
-      "validated": "true"
+      "validated": "true",
+      "gen_directory": "../../../../lab2.gen/sources_1/bd/design_1"
     },
     "design_tree": {
       "processing_system7_0": "",
@@ -1664,7 +1665,8 @@
             "mode": "Slave",
             "memory_map_ref": "S_AXI_HP0"
           }
-        }
+        },
+        "xci_path": "ip/design_1_processing_system7_0_0/design_1_processing_system7_0_0.xci"
       },
       "AXI_Converter_0": {
         "vlnv": "okstate.edu:user:AXI_Converter:1.1",
@@ -1692,11 +1694,13 @@
               }
             }
           }
-        }
+        },
+        "xci_path": "ip/design_1_AXI_Converter_0_0/design_1_AXI_Converter_0_0.xci"
       },
       "rst_ps7_0_50M": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "xci_name": "design_1_rst_ps7_0_50M_0"
+        "xci_name": "design_1_rst_ps7_0_50M_0",
+        "xci_path": "ip/design_1_rst_ps7_0_50M_0/design_1_rst_ps7_0_50M_0.xci"
       },
       "axi_smc": {
         "vlnv": "xilinx.com:ip:smartconnect:1.0",
@@ -1754,7 +1758,8 @@
               "M00_AXI"
             ]
           }
-        }
+        },
+        "xci_path": "ip/design_1_axi_smc_0/design_1_axi_smc_0.xci"
       },
       "top_0": {
         "vlnv": "xilinx.com:module_ref:top:1.0",
@@ -1811,7 +1816,8 @@
           "AXIStart": {
             "direction": "O"
           }
-        }
+        },
+        "xci_path": "ip/design_1_top_0_0/design_1_top_0_0.xci"
       }
     },
     "interface_nets": {

@@ -15,14 +15,14 @@ module top (                          input  wire        clk,
                              wire        MStrobe;
    
    // instantiate processor and memories
-   riscvsingle riscvsingle (.clk(clk),
+   riscv riscv (.clk(clk),
 		    .reset(reset),
-		    .PC(PC),
-		    .Instr(Instr),
-		    .MemWrite(MemWrite),
-		    .ALUResult(addressM), 
-		    .WriteData(writeDataM),
-		    .ReadData(readDataM),
+		    .PCF(PC),
+		    .InstrF(Instr),
+		    .MemWriteM(MemWrite),
+		    .ALUResultM(addressM), 
+		    .WriteDataM(writeDataM),
+		    .ReadDataM(readDataM),
 		    .MemStrobe(MStrobe),
 		    .PCReady(PCReady));
    imem imem (.a(PC),
