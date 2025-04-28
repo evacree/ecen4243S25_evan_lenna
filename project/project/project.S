@@ -10,36 +10,37 @@ rvtest_entry_point:
     # switch to supervisor mode	
     # Set mstatus.MPP to 01, set MPEC to a trampoline address where supervisor should begin, do mret
     
-				# TODO: fill in instructions here	
+				# TODO: fill in instructions here:	
+
+    # Configure PMP0 TOR to 0xFFFFFFFF to allow all 32-bit addresses
+    li t0, 0xFFFFFFFF
+    csrw pmpaddr0, t0 
 
 
     # Configure PMP0 to TOR RWX
-    li t0, 0x0F # 0b0_00_01_1_1_1
-    csrw pmpcfg0, t0
+    li t0, 0xF # 0b1_1_1_1
+    csrw pmpcfg0, t0 
     
-    # Configure PMP0 TOR to 0xFFFFFFFF to allow all 32-bit addresses
-    li t0, 0xFFFFFFFF
-    csrw pmpaddr0, t0
 
     # Set mstatus (MPP) and set MEPC (in supervisor)
 
-    li t1, 0x1800 # mpp = 11 to clear
+    ##li t1, 0x1800 # mpp = 11 to clear
+    ##csrc mstatus, t1
+    ##li t1, 0x800 # mpp = 01 for S mode
+    ##csrs mstatus, t1
 
-    csrc mstatus, t1
+    csrr t0, mstatus
+    li t1, (1 << 11)
+    or t0, t0, t1
+    csrw mstatus, t0
 
-    li t1, 0x800 # mpp = 01 for S mode
-
-    csrs mstatus, t1
-
-    li t0, 0x80000000
+    la t0, supervisorstart      # trampoline address to supervisor
     csrw mepc, t0
-    	
-
 
     mret                    	# enter supervisor mode at supervisorstart
     nop
 
-
+# end entry point
 
 supervisorstart:
     la t0, pagetable        	# get address of root page table
@@ -51,8 +52,8 @@ supervisorstart:
     li t1, 0x80000000 # top bit [31] = 1 for MODE = 1
     or t0, t0, t1 # assign top bit as 1 for satp
 
-
     csrw satp, t0         	# enable virtual memory
+    sfence.vma              # flush after writing to satp
     
     # now we are execuiting on virtual page 0x80000, which is also physical page 0x80000
     # (this can be whatever you want as long as you use the correct address defined in the proj)	
@@ -83,13 +84,39 @@ self_loop:
 tohost:
     .word 0
 
-.data
 
-
+.data # root/PT1: top page table
 .align 16
-# root (L1) Page table situated at 0x80010000
 pagetable:
+    .space 2048
+
+    .4byte 0x20004401
+
+    .space 252
+
+    .4byte 0x20004401
+
 
 .align 12
+pagetable_2: # leaf/PT0: bottom page table
+    .4byte 0x200000CF
+
+
+
+##.align 16   tried but not work :(
+# root (L1) Page table situated at 0x80010000
+##pagetable:
+
+##.space 2048
+##.word 0x20004400
+
+##.space
+##.word 0x20004400
+
+##.align 12
 # L0 page table situated at 0x80011000
+##.word 0x200000_ dAGU_F
+
+##_1111
+
 
