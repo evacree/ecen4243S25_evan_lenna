@@ -24,19 +24,10 @@ rvtest_entry_point:
 
     # Set mstatus (MPP) and set MEPC (in supervisor)
 
-    ##li t1, 0x1800 # mpp = 11 to clear
-    ##csrc mstatus, t1
-    ##li t1, 0x800 # mpp = 01 for S mode
-    ##csrs mstatus, t1
-
-    csrr t0, mstatus  #Conlan said to take this out
+    csrr t0, mstatus
     li t1, (1 << 11)
-    or t0, t0, t1  #Conlan said to take this out
-    csrw mstatus, t0    #Conlan said to take this out
-    #csrs mstatus, t0    #Conlan said to add this
-
-    #slli t1, t0, 12     #Conlan said to add this
-    #csrs mstatus, t1    #Conlan said to add this
+    or t0, t0, t1
+    csrw mstatus, t0
 
 
     la t0, supervisorstart      # trampoline address to supervisor
@@ -58,7 +49,6 @@ supervisorstart:
     or t0, t0, t1 # assign top bit as 1 for satp
 
     csrw satp, t0         	# enable virtual memory
-   # sfence.vma              # flush after writing to satp
     
     # now we are execuiting on virtual page 0x80000, which is also physical page 0x80000
     # (this can be whatever you want as long as you use the correct address defined in the proj)	
@@ -76,7 +66,6 @@ supervisorstart:
 
 testcode:
     li t0, 42                # do something
-    j write_tohost
     
 write_tohost:
     la s1, tohost           # terminate with write tohost
@@ -87,11 +76,12 @@ write_tohost:
 self_loop:
     j self_loop
 
+.align 4
 tohost:
     .word 0
 
 fromhost:
-#    .word 0
+    .word 0
 
 .data # root/PT1: top page table
 .align 16
@@ -111,20 +101,6 @@ pagetable_2: # leaf/PT0: bottom page table
 
 
 
-##.align 16   tried but not work :(
-# root (L1) Page table situated at 0x80010000
-##pagetable:
 
-##.space 2048
-##.word 0x20004400
-
-##.space
-##.word 0x20004400
-
-##.align 12
-# L0 page table situated at 0x80011000
-##.word 0x200000_ dAGU_F
-
-##_1111
 
 
