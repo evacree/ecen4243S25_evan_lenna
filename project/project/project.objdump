@@ -6,11 +6,11 @@ Contents of section .text:
  80000010 f3220030 05631303 0380b3e2 62007390  .".0.c......b.s.
  80000020 02309702 00009382 22017390 12347300  .0......".s..4s.
  80000030 20300100 97020100 9382c2fc 93d2c200   0..............
- 80000040 37030080 b3e26200 73900218 73000012  7.....b.s...s...
- 80000050 b7020090 93820230 1303a002 23a06200  .......0....#.b.
- 80000060 97020000 93822201 37030010 9a928282  ......".7.......
- 80000070 01009302 a0029704 00009384 44018542  ............D..B
- 80000080 23a05400 23a20400 01a00000 0000      #.T.#.........  
+ 80000040 37030080 b3e26200 73900218 b7020090  7.....b.s.......
+ 80000050 93820230 1303a002 23a06200 97020000  ...0....#.b.....
+ 80000060 93822201 37030010 9a928282 01009302  ..".7...........
+ 80000070 a00209a0 97040000 93844401 854223a0  ..........D..B#.
+ 80000080 540023a2 040001a0 00000000           T.#.........    
 Contents of section .data:
  80010000 00000000 00000000 00000000 00000000  ................
  80010010 00000000 00000000 00000000 00000000  ................
@@ -284,15 +284,15 @@ Contents of section .debug_line:
  0030 003c0000 00000005 02000000 80190308  .<..............
  0040 09020001 03010904 00010304 09040001  ................
  0050 03010902 0001030a 09040001 03010904  ................
- 0060 00010301 09060001 03010904 00010302  ................
+ 0060 00010301 09060001 03010904 00010307  ................
  0070 09040001 03010908 00010302 09040001  ................
  0080 03010904 00010305 09020001 03050908  ................
  0090 00010301 09040001 03010904 00010302  ................
- 00a0 09040001 03010904 00010304 09040001  ................
- 00b0 03010908 00010301 09040001 03030904  ................
- 00c0 00010301 09080001 03010904 00010301  ................
- 00d0 09020001 03020902 00010303 09020001  ................
- 00e0 03030904 00010301 09080001 03010902  ................
+ 00a0 09040001 03050904 00010301 09080001  ................
+ 00b0 03010904 00010303 09040001 03010908  ................
+ 00c0 00010301 09040001 03010902 00010302  ................
+ 00d0 09020001 03030902 00010301 09040001  ................
+ 00e0 03020902 00010301 09080001 03010902  ................
  00f0 00010301 09040001 03030904 00010906  ................
  0100 00000101                             ....            
 Contents of section .debug_line_str:
@@ -303,14 +303,14 @@ Contents of section .debug_line_str:
  0040 6563742e 5300                        ect.S.          
 Contents of section .debug_info:
  0000 21000000 05000104 00000000 01000000  !...............
- 0010 00000000 808e0100 0000000a 00000046  ...............F
+ 0010 00000000 808c0100 0000000a 00000046  ...............F
  0020 00000001 80                          .....           
 Contents of section .debug_abbrev:
  0000 01110010 17110112 0f030e1b 0e250e13  .............%..
  0010 05000000                             ....            
 Contents of section .debug_aranges:
  0000 1c000000 02000000 00000400 00000000  ................
- 0010 00000080 8e000000 00000000 00000000  ................
+ 0010 00000080 8c000000 00000000 00000000  ................
 Contents of section .debug_str:
  0000 70726f6a 6563742e 53002f68 6f6d652f  project.S./home/
  0010 30362d63 6f6d702d 61726368 2d6d2f65  06-comp-arch-m/e
@@ -342,76 +342,76 @@ rvtest_entry_point():
 8000001a:	0062e2b3          	or	t0,t0,t1
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:35
 8000001e:	30029073          	csrw	mstatus,t0
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:37
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:42
 80000022:	00000297          	auipc	t0,0x0
 80000026:	01228293          	addi	t0,t0,18 # 80000034 <supervisorstart>
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:38
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:43
 8000002a:	34129073          	csrw	mepc,t0
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:40
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:45
 8000002e:	30200073          	mret
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:41
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:46
 80000032:	0001                	nop
 
 80000034 <supervisorstart>:
 supervisorstart():
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:46
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:51
 80000034:	00010297          	auipc	t0,0x10
 80000038:	fcc28293          	addi	t0,t0,-52 # 80010000 <pagetable>
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:51
-8000003c:	00c2d293          	srli	t0,t0,0xc
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:52
-80000040:	80000337          	lui	t1,0x80000
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:53
-80000044:	0062e2b3          	or	t0,t0,t1
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:55
-80000048:	18029073          	csrw	satp,t0
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:56
-8000004c:	12000073          	sfence.vma
+8000003c:	00c2d293          	srli	t0,t0,0xc
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:57
+80000040:	80000337          	lui	t1,0x80000
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:58
+80000044:	0062e2b3          	or	t0,t0,t1
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:60
-80000050:	900002b7          	lui	t0,0x90000
-80000054:	30028293          	addi	t0,t0,768 # 90000300 <_end+0xffee300>
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:61
-80000058:	02a00313          	li	t1,42
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:62
-8000005c:	0062a023          	sw	t1,0(t0)
+80000048:	18029073          	csrw	satp,t0
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:65
-80000060:	00000297          	auipc	t0,0x0
-80000064:	01228293          	addi	t0,t0,18 # 80000072 <testcode>
+8000004c:	900002b7          	lui	t0,0x90000
+80000050:	30028293          	addi	t0,t0,768 # 90000300 <_end+0xffee300>
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:66
-80000068:	10000337          	lui	t1,0x10000
+80000054:	02a00313          	li	t1,42
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:67
-8000006c:	929a                	add	t0,t0,t1
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:68
-8000006e:	8282                	jr	t0
+80000058:	0062a023          	sw	t1,0(t0)
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:70
-80000070:	0001                	nop
-
-80000072 <testcode>:
-testcode():
+8000005c:	00000297          	auipc	t0,0x0
+80000060:	01228293          	addi	t0,t0,18 # 8000006e <testcode>
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:71
+80000064:	10000337          	lui	t1,0x10000
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:72
+80000068:	929a                	add	t0,t0,t1
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:73
-80000072:	02a00293          	li	t0,42
+8000006a:	8282                	jr	t0
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:75
+8000006c:	0001                	nop
 
-80000076 <write_tohost>:
-write_tohost():
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:76
-80000076:	00000497          	auipc	s1,0x0
-8000007a:	01448493          	addi	s1,s1,20 # 8000008a <tohost>
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:77
-8000007e:	4285                	li	t0,1
+8000006e <testcode>:
+testcode():
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:78
-80000080:	0054a023          	sw	t0,0(s1)
+8000006e:	02a00293          	li	t0,42
 /home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:79
-80000084:	0004a223          	sw	zero,4(s1)
+80000072:	a009                	j	80000074 <write_tohost>
 
-80000088 <self_loop>:
+80000074 <write_tohost>:
+write_tohost():
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:81
+80000074:	00000497          	auipc	s1,0x0
+80000078:	01448493          	addi	s1,s1,20 # 80000088 <tohost>
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:82
+8000007c:	4285                	li	t0,1
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:83
+8000007e:	0054a023          	sw	t0,0(s1)
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:84
+80000082:	0004a223          	sw	zero,4(s1)
+
+80000086 <self_loop>:
 self_loop():
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:82
-80000088:	a001                	j	80000088 <self_loop>
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:87
+80000086:	a001                	j	80000086 <self_loop>
 
-8000008a <tohost>:
+80000088 <tohost>:
 tohost():
-/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:82
-8000008a:	0000                	unimp
+/home/06-comp-arch-m/ecen4243S25_evan_lenna/project/project/project.S:87
+80000088:	0000                	unimp
 	...
 
 Disassembly of section .data:
@@ -521,7 +521,7 @@ Disassembly of section .debug_line:
   66:	0100                	addi	s0,sp,128
   68:	04090103          	lb	sp,64(s2)
   6c:	0100                	addi	s0,sp,128
-  6e:	04090203          	lb	tp,64(s2)
+  6e:	04090703          	lb	a4,64(s2)
   72:	0100                	addi	s0,sp,128
   74:	08090103          	lb	sp,128(s2)
   78:	0100                	addi	s0,sp,128
@@ -539,27 +539,27 @@ Disassembly of section .debug_line:
   9c:	0100                	addi	s0,sp,128
   9e:	04090203          	lb	tp,64(s2)
   a2:	0100                	addi	s0,sp,128
-  a4:	04090103          	lb	sp,64(s2)
+  a4:	04090503          	lb	a0,64(s2)
   a8:	0100                	addi	s0,sp,128
-  aa:	04090403          	lb	s0,64(s2)
+  aa:	08090103          	lb	sp,128(s2)
   ae:	0100                	addi	s0,sp,128
-  b0:	08090103          	lb	sp,128(s2)
+  b0:	04090103          	lb	sp,64(s2)
   b4:	0100                	addi	s0,sp,128
-  b6:	04090103          	lb	sp,64(s2)
+  b6:	04090303          	lb	t1,64(s2)
   ba:	0100                	addi	s0,sp,128
-  bc:	04090303          	lb	t1,64(s2)
+  bc:	08090103          	lb	sp,128(s2)
   c0:	0100                	addi	s0,sp,128
-  c2:	08090103          	lb	sp,128(s2)
+  c2:	04090103          	lb	sp,64(s2)
   c6:	0100                	addi	s0,sp,128
-  c8:	04090103          	lb	sp,64(s2)
+  c8:	02090103          	lb	sp,32(s2)
   cc:	0100                	addi	s0,sp,128
-  ce:	02090103          	lb	sp,32(s2)
+  ce:	02090203          	lb	tp,32(s2)
   d2:	0100                	addi	s0,sp,128
-  d4:	02090203          	lb	tp,32(s2)
+  d4:	02090303          	lb	t1,32(s2)
   d8:	0100                	addi	s0,sp,128
-  da:	02090303          	lb	t1,32(s2)
+  da:	04090103          	lb	sp,64(s2)
   de:	0100                	addi	s0,sp,128
-  e0:	04090303          	lb	t1,64(s2)
+  e0:	02090203          	lb	tp,32(s2)
   e4:	0100                	addi	s0,sp,128
   e6:	08090103          	lb	sp,128(s2)
   ea:	0100                	addi	s0,sp,128
@@ -615,7 +615,7 @@ Disassembly of section .debug_info:
    e:	0000                	unimp
   10:	0000                	unimp
   12:	0000                	unimp
-  14:	8e80                	.insn	2, 0x8e80
+  14:	8c80                	.insn	2, 0x8c80
   16:	0001                	nop
   18:	0000                	unimp
   1a:	0a00                	addi	s0,sp,272
@@ -650,7 +650,7 @@ Disassembly of section .debug_aranges:
    e:	0000                	unimp
   10:	0000                	unimp
   12:	8000                	.insn	2, 0x8000
-  14:	008e                	slli	ra,ra,0x3
+  14:	008c                	addi	a1,sp,64
 	...
 
 Disassembly of section .debug_str:

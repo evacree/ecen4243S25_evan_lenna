@@ -29,10 +29,15 @@ rvtest_entry_point:
     ##li t1, 0x800 # mpp = 01 for S mode
     ##csrs mstatus, t1
 
-    csrr t0, mstatus
+    csrr t0, mstatus  #Conlan said to take this out
     li t1, (1 << 11)
-    or t0, t0, t1
-    csrw mstatus, t0
+    or t0, t0, t1  #Conlan said to take this out
+    csrw mstatus, t0    #Conlan said to take this out
+    #csrs mstatus, t0    #Conlan said to add this
+
+    #slli t1, t0, 12     #Conlan said to add this
+    #csrs mstatus, t1    #Conlan said to add this
+
 
     la t0, supervisorstart      # trampoline address to supervisor
     csrw mepc, t0
@@ -53,7 +58,7 @@ supervisorstart:
     or t0, t0, t1 # assign top bit as 1 for satp
 
     csrw satp, t0         	# enable virtual memory
-    sfence.vma              # flush after writing to satp
+   # sfence.vma              # flush after writing to satp
     
     # now we are execuiting on virtual page 0x80000, which is also physical page 0x80000
     # (this can be whatever you want as long as you use the correct address defined in the proj)	
@@ -71,7 +76,8 @@ supervisorstart:
 
 testcode:
     li t0, 42                # do something
-
+    j write_tohost
+    
 write_tohost:
     la s1, tohost           # terminate with write tohost
     li t0, 1                # 1 for success, 3 for failure
@@ -84,6 +90,8 @@ self_loop:
 tohost:
     .word 0
 
+fromhost:
+#    .word 0
 
 .data # root/PT1: top page table
 .align 16
